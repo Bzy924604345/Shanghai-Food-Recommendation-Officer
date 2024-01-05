@@ -6,19 +6,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>上海美食推荐官</title>
   <link rel="shortcut icon" href="./images/头像.png" type="image/x-icon">
+
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js'></script>
+  <link href="https://iclient.supermap.io/dist/mapboxgl/iclient-mapboxgl.min.css" rel="stylesheet" />
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/1.13.2/mapbox-gl.js"></script>
+  <script type="text/javascript" src="https://iclient.supermap.io/dist/mapboxgl/iclient-mapboxgl.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
+  <script type="text/javascript">
+    const { MapboxLayer, ScatterplotLayer } = deck;
+  </script>
+
   <link rel="stylesheet" href="./css/reset.css">
-  <link rel="stylesheet" href="bootstrap/bootstrap.css">
   <link rel="stylesheet" href="./css/index.css">
-  <script include="leaflet-geoman,leaflet.draw,leaflet.miniMap" src="dist/leaflet/include-leaflet.js"></script>
+  <script src="./js/main.js"></script>
 </head>
 
-<body onload=onPageLoad()>
-  <div id="map" style="background:#f8f8f8;width: 100vw;height: 100vh;"></div>
-  <!-- <div class="main_title">上海美食推荐官</div> -->
-  <!-- <button type="button" class="btn btn-primary">Primary</button> -->
-  <script src="./js/main.js"></script>
-  <!-- <script src="js/jquery.js"></script> -->
-  <script src="./bootstrap/bootstrap.js"></script>
+
+<body>
+  <div class="main_container">
+    <div id="map-container"></div>
+    <span class="main-title">上海美食推荐官</span>
+
+    <!-- 搜索与筛选组件 -->
+    <div class="search_and_filter_container">
+      <!-- 搜索筛选按钮 -->
+      <div class="circle">
+        <div class="half01 half-circle" onclick="rotateCircle210()">
+          <div class="half01-text">搜索</div>
+        </div>
+        <div class="half02 half-circle" onclick="rotateCircle330()">
+          <div class="half02-text">筛选</div>
+        </div>
+      </div>
+
+      <!-- 搜索栏 -->
+      <div class="searchContainer">
+        <div class="container">
+          <input type="text" name="text" class="input" placeholder="搜索美食">
+          <button class="search_btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
+              <path
+                d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"
+                fill="#efeff1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- 搜索弹窗 -->
+      <div class="search_results_container">
+        <div class="result_items">
+          <div class="row1">
+            <div class="restaurant_name">张亮麻辣烫</div>
+            <div class="cuisine">非洲菜</div>
+          </div>
+          <div class="row2">
+            <img class="stars" src="./images/star_3.png">
+            <span class="score">4.0</span>
+            <div class="per">￥90/人</div>
+          </div>
+          <div class="row3">
+            <div class="address">镇江市句容市宝华镇京东紫晶南门7栋157</div>
+          </div>
+          <div class="horizontal-line"></div>
+        </div>
+        </br>
+      </div>
+      <!-- 筛选栏 -->
+      <div class="filterContainer">
+        <div class="filterForm">
+          <!-- 菜系 -->
+          <select id="dropdown-style" name="style">
+            <option value="all" selected>菜系</option>
+            <option value="all">全部</option>
+            <option value="SichuanCuisine">川菜</option>
+            <option value="CantoneseCuisine">粤菜</option>
+            <option value="ForeignCuisine">外国菜</option>
+          </select>
+
+          <!-- 地区 -->
+          <select id="dropdown-area" name="area">
+            <option value="all" selected>地区</option>
+            <option value="all">全部</option>
+            <option value="黄浦区">黄浦区</option>
+            <option value="徐汇区">徐汇区</option>
+            <option value="长宁区">长宁区</option>
+            <option value="静安区">静安区</option>
+            <option value="普陀区">普陀区</option>
+            <option value="虹口区">虹口区</option>
+            <option value="杨浦区">杨浦区</option>
+            <option value="闵行区">闵行区</option>
+            <option value="宝山区">宝山区</option>
+            <option value="嘉定区">嘉定区</option>
+            <option value="浦东新区">浦东新区</option>
+            <option value="金山区">金山区</option>
+            <option value="松江区">松江区</option>
+            <option value="青浦区">青浦区</option>
+            <option value="奉贤区">奉贤区</option>
+            <option value="崇明区">崇明区</option>
+          </select>
+
+          <!-- 评分 -->
+          <select id="dropdown-score" name="score">
+            <option value="all" selected>星级</option>
+            <option value="all">全部</option>
+            <option value="choiceY">3.0分以下</option>
+            <option value="choiceZ">3.5-4.0</option>
+            <option value="choiceZ">4.0-4.5</option>
+            <option value="choiceZ">4.5-5.0</option>
+          </select>
+
+        </div>
+      </div>
+
+      <!-- 缓冲区结果 -->
+      <div class="buffer_results_container">
+
+      </div>
+    </div>
+    <!-- AIsearch按钮 -->
+    <div class="AIsearch_btn_container">
+      <div class="AIsearch_btn">
+        <div class="arrow-wrapper">
+          <div class="arrow"></div>
+        </div>
+        AI Search
+      </div>
+      <div class="answer_content">
+        <!-- 这里是回答的内容 -->
+      </div>
+      <div class="ask_input">
+        <div class="voice_input" title="长按开始语音输入">
+          <img src="./images/麦克风.png" alt="麦克风">
+        </div>
+        <input type="text" value="介绍一下你自己">
+      </div>
+    </div>
+
+    <!-- buffersearch区域 -->
+    <div class="buffersearch_container">
+      <div class="ppic_container">
+        <div class="img_behind">yummy!!!</div>
+        <img src="./images/头像.png" alt="" onclick="showbuffersearch()">
+
+      </div>
+      <div class="dragMe">Drag Me!</div>
+
+      <div class="plnglat"><span>Get my location</span></div>
+
+      <div class="pbuffer">
+        <input type="text" value="radius(m)" onclick="clearInput()">
+        <button class="buffer_search_btn">Buffer Search</button>
+      </div>
+    </div>
 </body>
+
 
 </html>
