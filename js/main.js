@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 });
-
 function rotateCircle210() {
   var circle = document.querySelector('.circle');
   var text_div01 = document.querySelector('.half01-text');
